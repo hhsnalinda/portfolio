@@ -55,6 +55,31 @@ menuLinks.forEach(link => {
     });
 });
 
+// --- Click Outside to Close Mobile Menu ---
+document.addEventListener('click', (event) => {
+    // Only run this if we are on mobile and the menu is actually open
+    if (window.innerWidth <= 768 && isMenuOpen) {
+        
+        // Check if the user's tap was OUTSIDE the menu and OUTSIDE the logo button
+        const clickedInsideMenu = mobileMenu.contains(event.target);
+        const clickedOnLogo = logo.contains(event.target);
+
+        if (!clickedInsideMenu && !clickedOnLogo) {
+            // Fold the menu
+            mobileMenu.classList.remove('active');
+            isMenuOpen = false;
+            
+            // Reset the logo text depending on where we are scrolled
+            if (window.scrollY > 50) {
+                logo.innerHTML = '<i class="fas fa-bars"></i> Menu';
+            } else {
+                logo.innerHTML = 'hhsNalinda';
+            }
+        }
+    }
+});
+
+
 const textArray = [
     "Insurance Professional.", 
     "Risk Management Specialist.", 
