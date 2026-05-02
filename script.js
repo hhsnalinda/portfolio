@@ -176,26 +176,72 @@ readMoreBtns.forEach(btn => {
 
 
 
-// --- Google Sheets Form Submit Logic (Bottom Contact Area) ---
-const messageForm = document.getElementById('google-contact-form'); // Renamed variable!
+// ==========================================
+// --- SPLASH SCREEN & GOOGLE SHEETS LOGIC ---
+// ==========================================
+const splashScreen = document.getElementById('splash-screen');
+const mainPortfolio = document.getElementById('main-portfolio');
+const splashForm = document.getElementById('contact-form'); 
+const splashSubmitBtn = document.getElementById('submit-btn'); 
+
+// 🔴 THE MASTER GOOGLE SCRIPT URL 🔴
+const googleScriptURL = 'https://script.google.com/macros/s/AKfycbwNzvPhOCSjK3qeZpwngxilKl3SRoGQGkr0OWjKNkKRAKRggB6d-l4t1Tw79oCWCUcR/exec';
+
+// 1. Handle Splash Screen Submission
+if (splashForm) {
+    splashForm.addEventListener('submit', e => {
+        e.preventDefault();
+        
+        splashSubmitBtn.innerHTML = 'Connecting...';
+        splashSubmitBtn.style.opacity = '0.7';
+        splashSubmitBtn.disabled = true;
+
+        // Using URLSearchParams to ensure Google routes to the 'loginrec' tab
+        fetch(googleScriptURL, { method: 'POST', body: new URLSearchParams(new FormData(splashForm)) })
+            .then(response => {
+                splashScreen.classList.add('hidden');
+                mainPortfolio.style.display = 'block';
+                sessionStorage.setItem('portfolioUnlocked', 'true');
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert("Connection error. Please try again.");
+                splashSubmitBtn.innerHTML = 'Enter Portfolio';
+                splashSubmitBtn.style.opacity = '1';
+                splashSubmitBtn.disabled = false;
+            });
+    });
+}
+
+// 2. Check if unlocked on refresh
+document.addEventListener("DOMContentLoaded", () => {
+    if (sessionStorage.getItem('portfolioUnlocked') === 'true') {
+        if(splashScreen) splashScreen.style.display = 'none';
+        if(mainPortfolio) mainPortfolio.style.display = 'block';
+    }
+});
+
+
+// ==========================================
+// --- BOTTOM CONTACT AREA LOGIC ---
+// ==========================================
+const messageForm = document.getElementById('google-contact-form'); 
 
 if(messageForm) {
-    const messageSubmitBtn = messageForm.querySelector('.submit-btn'); // Renamed variable!
+    const messageSubmitBtn = messageForm.querySelector('.submit-btn'); 
     messageForm.addEventListener('submit', e => {
-        e.preventDefault(); // Stop the page from reloading
+        e.preventDefault(); 
         messageSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         
-        // YOUR CONTACT AREA GOOGLE APP SCRIPT URL
-        const messageScriptURL = 'https://script.google.com/macros/s/AKfycbwNzvPhOCSjK3qeZpwngxilKl3SRoGQGkr0OWjKNkKRAKRggB6d-l4t1Tw79oCWCUcR/exec';
-        
-        fetch(messageScriptURL, { method: 'POST', body: new FormData(messageForm)})
+        // Using URLSearchParams to ensure Google routes to the 'msgrec' tab
+        fetch(googleScriptURL, { method: 'POST', body: new URLSearchParams(new FormData(messageForm))})
             .then(response => {
                 messageSubmitBtn.innerHTML = '<i class="fas fa-check"></i> Message Sent!';
-                messageSubmitBtn.style.backgroundColor = '#25d366'; // Turn green
-                messageForm.reset(); // Clear the form
+                messageSubmitBtn.style.backgroundColor = '#25d366'; 
+                messageForm.reset(); 
                 setTimeout(() => {
                     messageSubmitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-                    messageSubmitBtn.style.backgroundColor = ''; // Reset color
+                    messageSubmitBtn.style.backgroundColor = ''; 
                 }, 3000);
             })
             .catch(error => {
@@ -205,58 +251,104 @@ if(messageForm) {
     });
 }
 
-// Check if they already filled it out this session
-document.addEventListener("DOMContentLoaded", () => {
-    if (sessionStorage.getItem('portfolioUnlocked') === 'true') {
-        splashScreen.style.display = 'none';
-        mainPortfolio.style.display = 'block';
-    }
-});
 
-
-
-
-// --- Google Sheets Form Submit Logic ---
-const contactForm = document.getElementById('google-contact-form');
-
-if(contactForm) {
-    const submitBtn = contactForm.querySelector('.submit-btn');
-    contactForm.addEventListener('submit', e => {
-        e.preventDefault(); // Stop the page from reloading
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        
-        // PASTE YOUR GOOGLE WEB APP URL HERE
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwNzvPhOCSjK3qeZpwngxilKl3SRoGQGkr0OWjKNkKRAKRggB6d-l4t1Tw79oCWCUcR/exec';
-        
-        fetch(scriptURL, { method: 'POST', body: new FormData(contactForm)})
-            .then(response => {
-                submitBtn.innerHTML = '<i class="fas fa-check"></i> Message Sent!';
-                submitBtn.style.backgroundColor = '#25d366'; // Turn green
-                contactForm.reset(); // Clear the form
-                setTimeout(() => {
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-                    submitBtn.style.backgroundColor = ''; // Reset color
-                }, 3000);
-            })
-            .catch(error => {
-                submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error. Try Again.';
-                console.error('Error!', error.message);
-            });
-    });
-}
-
-// --- Seamless Infinite Scroll Clone Logic ---
+// ==========================================
+// --- CONTINUOUS INFINITE LOOP CAROUSEL ---
+// ==========================================
+const certContainer = document.getElementById('cert-container');
 const certTrack = document.getElementById('cert-track');
+const slideLeftBtn = document.getElementById('slide-left');
+const slideRightBtn = document.getElementById('slide-right');
 
-if (certTrack) {
-    // Take every card inside the track...
-    const cards = Array.from(certTrack.children);
-    
-    // ...and make an exact copy of it at the end of the line!
-    cards.forEach(card => {
+if (certContainer && certTrack) {
+    let isInteracting = false;
+    let animationFrameId;
+
+    // 1. Clone cards to create the infinite loop illusion
+    const originalCards = Array.from(certTrack.children);
+    originalCards.forEach(card => {
         const clone = card.cloneNode(true);
-        // Important: Remove IDs from clones to prevent HTML conflicts
-        clone.removeAttribute('id'); 
         certTrack.appendChild(clone);
+    });
+
+    // 2. The 60fps Continuous Glide Logic
+    const startContinuousScroll = () => {
+        // TURN OFF CSS smooth scrolling and snapping so the JS glide doesn't stutter
+        certContainer.style.scrollBehavior = 'auto';
+        certContainer.style.scrollSnapType = 'none';
+
+        const scroll = () => {
+            if (!isInteracting) {
+                certContainer.scrollLeft += 1; // SPEED: Change to 2 for faster, 0.5 for slower
+
+                // Calculate the exact width of the original set of cards
+                const jumpDistance = certTrack.children[originalCards.length].offsetLeft - certTrack.children[0].offsetLeft;
+
+                // If we've scrolled past the original set, instantly and invisibly jump back
+                if (certContainer.scrollLeft >= jumpDistance) {
+                    certContainer.scrollLeft -= jumpDistance;
+                }
+            }
+            animationFrameId = requestAnimationFrame(scroll);
+        };
+
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = requestAnimationFrame(scroll);
+    };
+
+    const stopContinuousScroll = () => {
+        // TURN ON CSS smooth scrolling and snapping for manual swiping and arrows
+        certContainer.style.scrollBehavior = 'smooth';
+        certContainer.style.scrollSnapType = 'x mandatory';
+        cancelAnimationFrame(animationFrameId);
+    };
+
+    // Start the glide immediately (500ms timeout ensures images load so calculations are perfect)
+    setTimeout(startContinuousScroll, 500);
+
+    // 3. Manual Arrows Logic
+    const getCardWidth = () => certTrack.children[0].offsetWidth + 32; // 32px is the CSS gap
+
+    if (slideLeftBtn) {
+        slideLeftBtn.addEventListener('click', () => {
+            isInteracting = true;
+            stopContinuousScroll();
+            certContainer.scrollBy({ left: -getCardWidth(), behavior: 'smooth' });
+            // Resume glide after the smooth scroll finishes (approx 800ms)
+            setTimeout(() => { isInteracting = false; startContinuousScroll(); }, 800);
+        });
+    }
+
+    if (slideRightBtn) {
+        slideRightBtn.addEventListener('click', () => {
+            isInteracting = true;
+            stopContinuousScroll();
+            certContainer.scrollBy({ left: getCardWidth(), behavior: 'smooth' });
+            setTimeout(() => { isInteracting = false; startContinuousScroll(); }, 800);
+        });
+    }
+
+    // 4. Pause Listeners (Hover & Touch)
+    certContainer.addEventListener('mouseenter', () => {
+        isInteracting = true;
+        stopContinuousScroll();
+    });
+    
+    certContainer.addEventListener('mouseleave', () => {
+        isInteracting = false;
+        startContinuousScroll();
+    });
+
+    certContainer.addEventListener('touchstart', () => {
+        isInteracting = true;
+        stopContinuousScroll();
+    });
+    
+    certContainer.addEventListener('touchend', () => {
+        // Delay the restart so the user's manual swipe momentum can finish smoothly
+        setTimeout(() => {
+            isInteracting = false;
+            startContinuousScroll();
+        }, 1500); 
     });
 }
