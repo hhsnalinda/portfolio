@@ -244,3 +244,19 @@ if(contactForm) {
             });
     });
 }
+
+// --- Seamless Infinite Scroll Clone Logic ---
+const certTrack = document.getElementById('cert-track');
+
+if (certTrack) {
+    // Take every card inside the track...
+    const cards = Array.from(certTrack.children);
+    
+    // ...and make an exact copy of it at the end of the line!
+    cards.forEach(card => {
+        const clone = card.cloneNode(true);
+        // Important: Remove IDs from clones to prevent HTML conflicts
+        clone.removeAttribute('id'); 
+        certTrack.appendChild(clone);
+    });
+}
