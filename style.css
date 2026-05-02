@@ -429,36 +429,66 @@ overflow: hidden; /* Ensures the background stays inside the section */
             padding: 1.5rem; }
     }
 
-/* --- Lead Capture Splash Screen --- */
-.splash-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: #0f172a; /* Your dark slate branding */
-    display: flex; justify-content: center; align-items: center;
-    z-index: 100000;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+
+
+/* --- Horizontal Smooth Scrolling Carousel --- */
+.carousel-container {
+    width: 100%;
+    overflow: hidden; /* Hides everything outside the box */
+    padding: 1rem 0;
+    position: relative;
 }
 
-.splash-overlay.hidden {
-    opacity: 0; visibility: hidden;
+/* Creates a frosted fade effect on the left and right edges */
+.carousel-container::before,
+.carousel-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 80px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none; /* Lets you click cards under the fade */
+}
+.carousel-container::before {
+    left: 0;
+    background: linear-gradient(to right, #f8fafc 0%, transparent 100%);
+}
+.carousel-container::after {
+    right: 0;
+    background: linear-gradient(to left, #f8fafc 0%, transparent 100%);
 }
 
-.splash-box {
-    background: white; padding: 3rem 2rem; border-radius: 12px;
-    text-align: center; max-width: 400px; width: 90%;
-    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+.carousel-track {
+    display: flex;
+    gap: 2rem; /* Space between cards */
+    width: max-content; /* Allows track to stretch as long as it needs */
+    /* 40s is the speed. Change it to 20s for faster, 60s for slower */
+    animation: scrollCards 40s linear infinite; 
 }
 
-.splash-box h2 { color: #0f172a; margin-bottom: 0.5rem; font-size: 2rem;}
-.splash-box p { color: #475569; font-size: 0.95rem; margin-bottom: 1.5rem; }
-
-.splash-box input {
-    width: 100%; padding: 12px; margin-bottom: 1rem;
-    border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;
-    outline: none; transition: border-color 0.3s;
+/* Pauses the movement when someone tries to read a card! */
+.carousel-track:hover {
+    animation-play-state: paused;
 }
 
-.splash-box input:focus { border-color: #2563eb; } /* Tech Blue glow */
+/* Forces the cards to stay a specific width and not shrink */
+.carousel-track .card {
+    width: 350px; 
+    flex-shrink: 0;
+    white-space: normal;
+}
 
-.splash-box button {
-    width: 100%; padding: 12px; font-size: 1.1rem; justify-content: center;
+/* The actual movement animation */
+@keyframes scrollCards {
+    0% { transform: translateX(0); }
+    /* Moves exactly half the track width (plus half the gap) to create a perfect loop */
+    100% { transform: translateX(calc(-50% - 1rem)); } 
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .carousel-track .card {
+        width: 300px; /* Slightly smaller cards on phones */
+    }
 }
