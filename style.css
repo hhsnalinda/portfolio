@@ -59,25 +59,25 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 .nav-links { display: flex; gap: 1rem; list-style: none; }
 .nav-links a:hover { color: #2563eb; transition: color 0.3s; }
 
+
 /* Hero Section */
 .hero { 
-     /*Hero area Background Image*/
+    /* Hero area Background Image (Make sure 'Images' has a capital I if your folder does!) */
     background-image: linear-gradient(rgba(255, 255, 255, 0.36), rgba(248, 250, 252, 0.95)), 
-     url('images/hero-bg1.jpg');   /* The fix for mobile background locking */
-    opacity: 0.75; 
-    z-index: -1; 
+                      url('Images/hero-bg1.jpg');   
+    
     background-size: cover;
     background-position: top;
-    /* The fix for mobile background locking */
-    background-attachment: fixed;
+    background-attachment: fixed; /* The fix for mobile background locking */
+    
+    /* Layout properties */
     display: flex; 
     align-items: flex-start; 
     justify-content: space-between; 
     padding: 5rem 5%; 
     max-width: 1200px; 
-    margin: auto; gap: 3rem; 
-    
-   
+    margin: auto; 
+    gap: 3rem; 
 }
 
 
