@@ -340,3 +340,66 @@ if (certContainer && certTrack) {
         }, 1500); 
     });
 }
+
+// ==========================================
+// --- PREMIUM SUPER OFFERS CAROUSEL LOGIC ---
+// ==========================================
+const offerContainer = document.getElementById('offer-container');
+const offerTrack = document.getElementById('offer-track');
+const offerLeftBtn = document.getElementById('offer-left');
+const offerRightBtn = document.getElementById('offer-right');
+const offerDotsContainer = document.getElementById('offer-dots');
+
+if (offerContainer && offerTrack && offerDotsContainer) {
+    const offerCards = Array.from(offerTrack.children);
+    
+    // 1. Generate the Pagination Dots dynamically
+    offerCards.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        if (index === 0) dot.classList.add('active'); // First dot is active by default
+        
+        // Allow users to click a dot to instantly slide to that specific card
+        dot.addEventListener('click', () => {
+            const cardWidth = offerCards[0].offsetWidth + 24; // Width + gap
+            offerContainer.scrollTo({ left: cardWidth * index, behavior: 'smooth' });
+        });
+        
+        offerDotsContainer.appendChild(dot);
+    });
+
+    const dots = Array.from(offerDotsContainer.children);
+
+    // 2. Update the active dot automatically when swiping/scrolling
+    offerContainer.addEventListener('scroll', () => {
+        const scrollPos = offerContainer.scrollLeft;
+        const cardWidth = offerCards[0].offsetWidth + 24;
+        
+        // Calculate which card is currently closest to the left edge
+        const activeIndex = Math.round(scrollPos / cardWidth);
+        
+        // Light up the correct dot
+        dots.forEach((dot, index) => {
+            if (index === activeIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    });
+
+    // 3. Arrow Navigation Logic
+    const getOfferScrollAmount = () => offerCards[0].offsetWidth + 24;
+
+    if (offerLeftBtn) {
+        offerLeftBtn.addEventListener('click', () => {
+            offerContainer.scrollBy({ left: -getOfferScrollAmount(), behavior: 'smooth' });
+        });
+    }
+
+    if (offerRightBtn) {
+        offerRightBtn.addEventListener('click', () => {
+            offerContainer.scrollBy({ left: getOfferScrollAmount(), behavior: 'smooth' });
+        });
+    }
+}
