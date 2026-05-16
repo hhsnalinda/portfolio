@@ -403,3 +403,65 @@ if (offerContainer && offerTrack && offerDotsContainer) {
         });
     }
 }
+
+// ==========================================
+// --- SMOOTH SLIDING HERO BACKGROUND ---
+// ==========================================
+const heroSection = document.querySelector('.hero');
+
+if (heroSection) {
+    // 1. List your background images (Must match your GitHub folder exactly!)
+    const heroImages = [
+        'Images/hero-bg1.jpg',
+        'Images/hero-bg2.jpg',
+        'Images/hero-bg3.jpg',
+        'Images/hero-bg4.jpg',
+        'Images/hero-bg5.jpg',
+        'Images/hero-bg6.jpg',
+        'Images/hero-bg7.jpg',
+        'Images/hero-bg8.jpg'
+    ];
+
+    // 2. Automatically create the slider track in the background
+    const sliderContainer = document.createElement('div');
+    sliderContainer.className = 'hero-slider-container';
+    
+    const sliderTrack = document.createElement('div');
+    sliderTrack.className = 'hero-slider-track';
+
+    // Magic Trick: Clone the first image and put it at the end to create a seamless infinite loop!
+    const imagesWithClone = [...heroImages, heroImages[0]];
+
+    imagesWithClone.forEach(imgSrc => {
+        const slide = document.createElement('div');
+        slide.className = 'hero-slide';
+        slide.style.backgroundImage = `url('${imgSrc}')`;
+        sliderTrack.appendChild(slide);
+    });
+
+    sliderContainer.appendChild(sliderTrack);
+    
+    // Insert it behind all your text and images in the Hero section
+    heroSection.insertBefore(sliderContainer, heroSection.firstChild);
+
+    // 3. The Smooth Sliding Logic
+    let currentSlideIndex = 0;
+
+    setInterval(() => {
+        currentSlideIndex++;
+        
+        // Turn on the smooth sliding animation
+        sliderTrack.style.transition = 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)';
+        sliderTrack.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+
+        // If we just slid to the cloned image at the very end...
+        if (currentSlideIndex === heroImages.length) {
+            // Wait 1 second for the slide to finish, then instantly and invisibly jump back to the start!
+            setTimeout(() => {
+                sliderTrack.style.transition = 'none'; // Turn animation off for the secret jump
+                sliderTrack.style.transform = `translateX(0%)`;
+                currentSlideIndex = 0;
+            }, 1000); 
+        }
+    }, 5000); // Slides every 3 seconds (Change to 4000 or 5000 if it feels too fast)
+}
